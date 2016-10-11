@@ -113,11 +113,13 @@ class PlasmaContext():
 			return
 
 
-
-	def showVelocity(self, data, fvm=None):
+	#Plottype is optional.  Use it to rename the dv1 plottype
+	def showVelocity(self, data, fvm=None, plottype=None):
 		if not self.isGraphing():
 			return
 		dv1 = Graphs.DrawVelocity(data, fvm=fvm)
+		if plottype is not None:
+			dv1.plottype = plottype
 		self._sendplot(dv1)
 
 	def showPotential(self, data):
@@ -138,7 +140,7 @@ class PlasmaContext():
 		dv1 = Graphs.DrawSimple(name, xdata, ydata, text)
 		self._sendplot(dv1)
 
-	def showPhase(self, ppart, kpic):  #data is the particle data, ppart.  kpic is array of num particles per tile
+	def showPhase(self, ppart, kpic, plottype=None):  #data is the particle data, ppart.  kpic is array of num particles per tile
 		if not self.isGraphing():
 			return
 		#shape is the bounds of the histogram, [[xmin,xmax], [ymin,ymax]]
@@ -153,6 +155,8 @@ class PlasmaContext():
 			isum += kk
 
 		dv1 = Graphs.DrawPhase( xvInTile ) #copy the data
+		if plottype != None:
+			dv1.plottype = plottype
 		self._sendplot(dv1)
 
 	def showFastPhase(self, ppart, kpic):  #data is the particle data, ppart.  kpic is array of num particles per tile
@@ -192,11 +196,13 @@ class PlasmaContext():
 		dv1 = Graphs.DrawScaler(name,data, nx, time)
 		self._sendplot(dv1)
 
-	def showPhi(self, time, phi, dta, dt):
+	def showPhi(self, time, phi, dta, dt, plottype=None):
 		if not self.isGraphing():
 			return
 		if len(phi) > 0:
 			dv1 = Graphs.DrawPhi([np.array(time), phi, dta], dt)
+			if plottype != None:
+				dv1.plottype = plottype
 			self._sendplot(dv1)
 
 	def showMultiTrajectory(self, partd, itt, comp):

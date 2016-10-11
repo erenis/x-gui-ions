@@ -52,6 +52,13 @@ def rightType(val):
 #initialize data structures
 def init(s1):
     s1.timedirection = 0 #Set time forward.  Not a fortan variable
+    s1.phikw = []
+    s1.phikw_time = []
+    s1.phikw_dta = []
+    s1.phikwi = []
+    s1.phikwi_time = []
+    s1.phikwi_dta = []
+
     # s1.idimp = number of particle coordinates = 2
     # s1.ipbc = particle boundary condition: 1 = periodic
     s1.idimp = 2; s1.ipbc = 1
@@ -107,6 +114,11 @@ def init(s1):
 
     # open graphics device
     s1.irc[0] = graf1.open_graphs(s1.nplot)
+
+    if s1.nts > 0:
+      pc.addGraph("EDRAWPHASE", "Electron Phase Plot") #Enable ion velocities
+      if s1.movion > 0:
+        pc.addGraph("IDRAWPHASE", "Ion Phase Plot") #Enable ion velocities
 
     # initialize scalars for standard code
     # increase number of coordinates for particle tag
@@ -256,6 +268,7 @@ def init(s1):
     # s1.wt = energy time history array
        s1.wt = numpy.zeros((s1.mtw,4),float_type,'F')
        s1.s = numpy.zeros((4),double_type,'F')
+       pc.addGraph("ENERGY", "Energy") #Enable electron velocity
 
     # allocate scratch arrays for scalar fields
     if ((s1.ntde > 0) or (s1.ntp > 0) or (s1.ntel > 0) or (s1.ntdi > 0)):
@@ -266,6 +279,7 @@ def init(s1):
           s1.iw = int((s1.wmax - s1.wmin)/s1.dw + 1.5)
           s1.wm = numpy.empty((s1.iw),float_type,'F')
           s1.wm[:] = s1.wmin + s1.dw*numpy.linspace(0,s1.iw,s1.iw)
+          pc.addGraph("DRAWPHI","Phi(k,w)")
     # s1.cwk = labels for power spectrum display
           s1.cwk = numpy.array([" W > 0"," W < 0"],'S6')
     # allocate and initialize scratch array for ion spectral analysis
@@ -287,7 +301,8 @@ def init(s1):
 
     # initialize ion density diagnostic
     if (s1.ntdi > 0):
-       s1.fdiname = "denik1." + s1.cdrun
+       pc.addGraph("IONSPECT","Ion Density Spectral Analysis(k,w)")
+       s1.fdiname[:] = "denik1." + s1.cdrun
        s1.modesxdi = int(min(s1.modesxdi,nxh+1))
     # s1.denit = store selected fourier modes for ion density
        s1.denit = numpy.empty((s1.modesxdi),complex_type,'F')
@@ -296,7 +311,7 @@ def init(s1):
           mdiag1.dafopennc1(s1.denit,s1.iudi,s1.ndirec,s1.fdiname)
     # ion spectral analysis
        if ((s1.nddi==2) or (s1.nddi==3)):
-          s1.mtdi = int((s1.nloop - 1)/s1.ntdi) + 1; itdi = 0
+          s1.mtdi = int((s1.nloop - 1)/s1.ntdi) + 1; s1.itdi = 0
     # s1.pkwdi = power spectrum for potential
           s1.pkwdi = numpy.empty((s1.modesxdi,s1.iwi,2),float_type,'F')
     # s1.pksdi = accumulated complex spectrum for potential
@@ -306,6 +321,7 @@ def init(s1):
 
     # initialize potential diagnostic
     if (s1.ntp > 0):
+       pc.addGraph("DRAWPOT","Potential")
        s1.fpname[:] = "potk1." + s1.cdrun
        s1.modesxp = int(min(s1.modesxp,nxh+1))
     # s1.pott = store selected fourier modes for potential
@@ -315,7 +331,7 @@ def init(s1):
           mdiag1.dafopennc1(s1.pott,s1.iup,s1.nprec,s1.fpname)
     # spectral analysis
        if ((s1.ndp==2) or (s1.ndp==3)):
-          s1.mtp = int((s1.nloop - 1)/s1.ntp) + 1; itp = 0
+          s1.mtp = int((s1.nloop - 1)/s1.ntp) + 1; s1.itp = 0
     # s1.pkw = power spectrum for potential
           s1.pkw = numpy.empty((s1.modesxp,s1.iw,2),float_type,'F')
     # s1.pks = accumulated complex spectrum for potential
@@ -335,6 +351,7 @@ def init(s1):
 
     # initialize velocity diagnostic
     if (s1.ntv > 0):
+       pc.addGraph("EVELOCITY", "Electron Velocity") #Enable electron velocity
     # s1.sfv = electron velocity distribution functions in tile
        s1.sfv = numpy.empty((2*s1.nmv+2,1,s1.mx1+1),float_type,'F')
     # s1.fvm = electron vdrift, vth, entropy for global distribution
@@ -346,6 +363,7 @@ def init(s1):
                             4.0*s1.vtdx+abs(s1.vdx))
     # ions
        if (s1.movion==1):
+          pc.addGraph("IVELOCITY", "Ion Velocity") #Enable ion velocities
     # s1.sfvi = ion velocity distribution functions in tile
           s1.sfvi = numpy.empty((2*s1.nmv+2,1,s1.mx1+1),float_type,'F')
     # s1.fvmi = ion vdrift, vth, entropy for global distribution
@@ -460,7 +478,7 @@ def step(s1):
                s1.irc[0] = 0
                # ion spectral analysis
                if ((s1.nddi==2) or (s1.nddi==3)):
-                  itdi += 1
+                  s1.itdi += 1
                   ts = s1.dt*float(s1.ntime)
                   mdiag1.micspect1(s1.denit,s1.wmi,s1.pkwdi,s1.pksdi,ts,s1.t0,
                                    s1.tdiag,s1.mtdi,s1.iwi,s1.modesxdi,s1.nx,-1)
@@ -468,6 +486,10 @@ def step(s1):
                   s1.wkdi[:,0] = s1.wm[numpy.argmax(s1.pkwdi[:,:,0],axis=1)]
                   s1.wkdi[:,1] = s1.wm[numpy.argmax(s1.pkwdi[:,:,1],axis=1)]
                   # display frequency spectrum
+                  s1.phikwi.append( numpy.array(s1.denit, copy=True) )  #add data to phikw
+                  s1.phikwi_time.append( s1.ntime*s1.dt )
+                  s1.phikwi_dta.append( s1.dt )
+                  pc.showPhi(s1.phikwi_time, s1.phikwi, s1.phikwi_dta, s1.dt, plottype="IONSPECT")
                   graf1.dmscaler1(s1.wkdi,'IDENSITY OMEGA VS MODE',s1.ntime,
                                   999,1,s1.modesxdi,s1.cwk,s1.irc)
                   if (s1.irc[0]==1):
@@ -511,13 +533,14 @@ def step(s1):
             mfft1.mfft1cr(s1.sfieldc,s1.sfield,s1.mixup,s1.sct,s1.tfft,s1.indx)
             mgard1.mdguard1(s1.sfield,s1.tguard,s1.nx)
             # display potential
+            pc.showPotential(s1.sfield)
             graf1.dscaler1(s1.sfield,' POTENTIAL',s1.ntime,999,0,s1.nx,s1.irc)
             if (s1.irc[0]==1):
                return
             s1.irc[0] = 0
          # spectral analysis
          if ((s1.ndp==2) or (s1.ndp==3)):
-            itp += 1
+            s1.itp += 1
             ts = s1.dt*float(s1.ntime)
             mdiag1.micspect1(s1.pott,s1.wm,s1.pkw,s1.pks,ts,s1.t0,s1.tdiag,s1.mtp,s1.iw,
                              s1.modesxp,s1.nx,1)
@@ -525,6 +548,10 @@ def step(s1):
             s1.wk[:,0] = s1.wm[numpy.argmax(s1.pkw[:,:,0],axis=1)]
             s1.wk[:,1] = s1.wm[numpy.argmax(s1.pkw[:,:,1],axis=1)]
             # display frequency spectrum
+            s1.phikw.append( numpy.array(s1.pott, copy=True) )  #add data to phikw
+            s1.phikw_time.append( s1.ntime*s1.dt )
+            s1.phikw_dta.append( s1.dt )
+            pc.showPhi(s1.phikw_time, s1.phikw, s1.phikw_dta, s1.dt)
             graf1.dmscaler1(s1.wk,'POTENTIAL OMEGA VS MODE',s1.ntime,999,1,
                             s1.modesxp,s1.cwk,s1.irc)
             if (s1.irc[0]==1):
@@ -560,7 +587,7 @@ def step(s1):
          # store time history electron vdrift, vth, and entropy
          s1.fvtm[s1.itv,:,:] = s1.fvm
          # display electron velocity distributions
-         pc.showVelocity(in1.sfv[:,:,s1.mx1], fvm=s1.fvm)
+         pc.showVelocity(s1.sfv[:,:,s1.mx1], fvm=s1.fvm, plottype="EVELOCITY")
          graf1.displayfv1(s1.sfv[:,:,s1.mx1],s1.fvm,' ELECTRON',s1.ntime,s1.nmv,1,
                           s1.irc)
          if (s1.irc[0]==1):
@@ -572,6 +599,7 @@ def step(s1):
             # store time history ion vdrift, vth, and entropy
             s1.fvtmi[s1.itv,:,:] = s1.fvmi
             # display ion velocity distributions
+            pc.showVelocity(s1.sfvi[:,:,s1.mx1], fvm=s1.fvmi, plottype="IVELOCITY")
             graf1.displayfv1(s1.sfvi[:,:,s1.mx1],s1.fvmi,' ION',s1.ntime,s1.nmv,1,
                              s1.irc)
             if (s1.irc[0]==1):
@@ -602,6 +630,7 @@ def step(s1):
       s1.it = int(s1.ntime/s1.nts)
       if (s1.ntime==s1.nts*s1.it):
          # plot electrons vx versus x
+         pc.showPhase(s1.ppart, s1.kpic, plottype = "EDRAWPHASE")
          graf1.dpmgrasp1(s1.ppart,s1.kpic,' ELECTRON',s1.ntime,999,s1.nx,2,1,
                          s1.ntsc,s1.irc)
          if (s1.irc[0]==1):
@@ -610,6 +639,7 @@ def step(s1):
          # ion phase space
          if (s1.movion==1):
             # plot electrons vx versus x
+            pc.showPhase(s1.pparti, s1.kipic, plottype = "IDRAWPHASE")
             graf1.dpmgrasp1(s1.pparti,s1.kipic,' ION',s1.ntime,999,s1.nx,2,1,
                             s1.ntsc,s1.irc)
             if (s1.irc[0]==1):
@@ -685,6 +715,7 @@ def step(s1):
             s1.iuot.write("%14.7e %14.7e %14.7e %14.7e\n" % (s1.we[0],s1.wke[0],
                        s1.wki[0],s1.ws[0])) 
          s1.wt[s1.itw,:] = [s1.we[0],s1.wke[0],s1.wki[0],s1.ws[0]]
+         pc.showEnergy(numpy.array(range(s1.itw))*in1.dt, s1.wt, s1.itw )
          s1.itw += 1
          s1.s[0] += s1.we[0]
          s1.s[1] += s1.wke[0]
@@ -791,8 +822,7 @@ pc.showGraphs(True)   #enable graphics.  Setting to false will disable graphics
 pc.asyncMode(0)     #Run in synchornos mode.
 pc.callbacks["VARCHANGE"] = changeVarsCallback  #Set a callback
 pc.callbacks["RESET"] = resetCallback  #define the callback
-#pc.clearGraphList()
-pc.addGraph("VELOCITY", "Electron Velocity")
+pc.clearGraphList()  #remove all default graph options
 
 #Now init Fortran simulation
 init(in1)

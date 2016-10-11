@@ -1,5 +1,8 @@
 import copy
 import wx
+import collections
+import functools
+import operator
 import wx.stc as stc
 import numpy as np
 import matplotlib
@@ -151,7 +154,7 @@ class DrawOptions():
 		_at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
 		axes.add_artist(_at)"""
 		if self.simTime != None:
-			axes.annotate("Time: "+str(self.simTime)+extra, xy=(0.2, 1.05), xycoords='axes fraction')
+			axes.annotate("Time: "+str(self.simTime)+extra, xy=(0.0, 1.05), xycoords='axes fraction')
 
 	def scaleYAxis(self,fig,axes, ydata, factor):
 		if self._PV.has_key("ymin") and self._PV.has_key("ymax"):
@@ -248,13 +251,13 @@ class DrawVelocity(DrawOptions, KeyList):
 	def __init__(self,ydata,simtime=None,fvm=None):
 		DrawOptions.__init__(self)
 		self.setupKeylist(DrawOptions.defaultKeylist)
-		self.ydata = ydata
+		self.ydata = [ydata]
 		self.plottype = "DRAWVELOCITY"
 		self.simTime = simtime
-		vmax = self.ydata[0,0]
+		vmax = self.ydata[0][0,0]
 		vmin = -vmax
-		self.xax = NP.linspace(vmin,vmax,NP.size(self.ydata[1:,0]))
-		self.fvm = fvm
+		self.xax = NP.linspace(vmin,vmax,NP.size(self.ydata[0][1:,0]))
+		self.fvm = [fvm]
 
 	def drawPlot(self, fig, axes):
 		try:
@@ -263,13 +266,14 @@ class DrawVelocity(DrawOptions, KeyList):
 		except AttributeError:
 			self.PaxesType = "Linear-Linear"
 		self.updateAxes(fig,axes)
-		axes.plot(self.xax, self.ydata[1:,0],'-x')
-		extText = ""
-		if self.fvm != None:
-			extText = "  VTX = " + str(self.fvm[1,0])
-		self.drawTime(fig, axes, extText)
-		self.scaleYAxis(fig,axes, self.ydata[1:,0], 2.0)
-		self._PV["poop"] = extText
+		for i,ydata in enumerate(self.ydata):
+			axes.plot(self.xax, ydata[1:,0],'-x')
+			extText = ""
+			if self.fvm != None:
+				extText = "  VTX = " + str(self.fvm[i][1,0])
+			self.drawTime(fig, axes, extText)
+			self.scaleYAxis(fig,axes, ydata[1:,0], 2.0)
+			self._PV["poop"] = extText
 		
 
 class DrawPotential(DrawOptions, KeyList):
@@ -578,7 +582,7 @@ class DrawPhi( KeyList):
 		fig.colorbar(mim)
 		axes.set_xlabel(r"$k$")
 		axes.set_ylabel(r"$\omega$")
-		axes.annotate("Time Slice: " + str(self.phikw_time[lb]*self.dt) + " to "+str(self.phikw_time[ub-1]*self.dt), xy=(0.2, 1.05), xycoords='axes fraction')
+		axes.annotate("Time Slice: " + str(self.phikw_time[lb]*self.dt) + " to "+str(self.phikw_time[ub-1]*self.dt), xy=(0.0, 1.05), xycoords='axes fraction')
 
 		#If you crearted new axes, return
 		return axes

@@ -226,6 +226,7 @@ class LeftPanel(wx.Panel):
 		rax = self.currentEvent.data.drawPlot(self.figure, self.axes)
 		if rax != None: #This allows the graph to reconfigure its own axes, instead of allowing the panel to handle it
 			self.axes = rax
+		self.axes.set_title(self.currentEvent.data.plottype, loc="right")
 		
 		self.mycanvas.draw()
 		self.slopeStack = []

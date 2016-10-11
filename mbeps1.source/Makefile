@@ -184,14 +184,14 @@ EDMODS = modmdpush1.o
 #GOBJS = libt1.o plot10.o libplt10.o dlibgks1.o libgks1.o libgraf1_h.o \
 #modgraf1.o
 # X11 graphics needs Ygl from http://www.thp.uni-duisburg.de/Ygl/
-GOBJS = libygl.o dlibgks1.o libgks1.o libgraf1_h.o modgraf1.o
+#GOBJS = libygl.o dlibgks1.o libgks1.o libgraf1_h.o modgraf1.o
 #No graphics
 #GOBJS = nullgks1.o libgraf1_h.o modgraf1.o
 
 #GOBJS = libt1.o plot10.o libplt10.o dlibgks1.o libgks1.o libgraf1_h.o \
 #modgraf1.o libgks2.o libgraf2_h.o modgraf2.o
 #No graphics
-#GOBJS = nullgks1.o nullgks2.o libgraf1_h.o modgraf1.o libgraf2_h.o \
+GOBJS = nullgks1.o nullgks2.o libgraf1_h.o modgraf1.o libgraf2_h.o \
 #modgraf2.o
 
 # Python
@@ -216,11 +216,11 @@ EDPYOBJS = pymdpush1.o
 #GMODSRC = modgraf1.f90 libt1.f90
 #GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibplt10.o pymplot10.o
 # X11 graphics needs Ygl from http://www.thp.uni-duisburg.de/Ygl/
-GMODSRC = modgraf1.f90
-GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibygl.o
-#No graphics
 #GMODSRC = modgraf1.f90
-#GPYOBJS = pymnullgks1.o
+#GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibygl.o
+#No graphics
+GMODSRC = modgraf1.f90
+GPYOBJS = pymnullgks1.o
 
 # Linkage rules
 
