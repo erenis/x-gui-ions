@@ -216,17 +216,32 @@ class DrawSimple(DrawOptions, KeyList):
 	def __init__(self, name, xdata, ydata, text):
 		DrawOptions.__init__(self)
 		self.setupKeylist(DrawOptions.defaultKeylist)
-		self.ydata = ydata
-		self.xdata = xdata
-		self.plottype = name
+		if type(name) != type([]):
+			self.nl = [name]
+		else:
+			self.nl = name
+			if len(self.nl) != len(xdata) + 1:
+				sys.stderr.write("You the 0th entry in name must be the overlay name.  On other words name is 1 element larger than xdata!")
+				exit(0)
+		if type(ydata) != type([]):
+			self.ydata = [ydata]
+		else:
+			self.ydata = ydata
+		if type(xdata) != type([]):
+			self.xdata = [xdata]
+		else:
+			self.xdata = xdata
 		self.text = text
+		self.plottype = self.nl[0]
 
 	def drawPlot(self, fig, axes):
 		self.syncParameters()
 		self.setAxesType(self.PaxesType)
+		for i, ydata in enumerate(self.ydata):
+			axes.plot(self.xdata[i], ydata,"-", label=self.nl[i+1] )
 		self.updateAxes(fig,axes)
-		axes.plot(self.xdata, self.ydata,"-x" )
-		self.drawTime(fig, axes, self.text )
+		axes.legend()
+		#self.drawTime(fig, axes, self.text )
 		#well defined axis here
 
 class DrawScaler(DrawOptions, KeyList):
@@ -469,7 +484,7 @@ class PhiControlPanel(BaseControlPanel):
 		#Maximum Omega Slider
 		self.omegaMinVal = wx.StaticText(self.panel, label="", pos=(20, 90)) 
 		txt = wx.StaticText(self.panel, label='Maximum Omega', pos=(20, 90))  
-		sld = wx.Slider(self.panel, value=self.POmegaMax, minValue=2, maxValue=10, pos=(20, 20), size=(250, -1), style=wx.SL_HORIZONTAL)
+		sld = wx.Slider(self.panel, value=self.POmegaMax, minValue=2, maxValue=50, pos=(20, 20), size=(250, -1), style=wx.SL_HORIZONTAL)
 		hs1.Add(txt)
 		hs1.Add(sld)
 		hs1.Add(self.omegaMinVal)

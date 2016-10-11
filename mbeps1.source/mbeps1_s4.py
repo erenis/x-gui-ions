@@ -115,6 +115,8 @@ def init(s1):
     # open graphics device
     s1.irc[0] = graf1.open_graphs(s1.nplot)
 
+    pc.addGraph("DENOVERLAY", "Overlay: Ion & Electron density")
+
     if s1.nts > 0:
       pc.addGraph("EDRAWPHASE", "Electron Phase Plot") #Enable ion velocities
       if s1.movion > 0:
@@ -291,7 +293,8 @@ def init(s1):
 
     # initialize electron density diagnostic
     if (s1.ntde > 0):
-       s1.fdename = "denek1." + s1.cdrun
+       pc.addGraph("EDENSITY","Electron Density")
+       s1.fdename[:] = "denek1." + s1.cdrun
        s1.modesxde = int(min(s1.modesxde,nxh+1))
     # s1.denet/s1.denit = store selected fourier modes for electron density
        s1.denet = numpy.empty((s1.modesxde),complex_type,'F')
@@ -302,6 +305,7 @@ def init(s1):
     # initialize ion density diagnostic
     if (s1.ntdi > 0):
        pc.addGraph("IONSPECT","Ion Density Spectral Analysis(k,w)")
+       pc.addGraph("IDENSITY","Ion Density")
        s1.fdiname[:] = "denik1." + s1.cdrun
        s1.modesxdi = int(min(s1.modesxdi,nxh+1))
     # s1.denit = store selected fourier modes for ion density
@@ -341,7 +345,8 @@ def init(s1):
 
     # initialize longitudinal efield diagnostic
     if (s1.ntel > 0):
-       s1.felname = "elk1." + s1.cdrun
+       pc.addGraph("ELON","Longitudinal E-Field")
+       s1.felname[:] = "elk1." + s1.cdrun
        s1.modesxel = int(min(s1.modesxel,nxh+1))
     # s1.elt = store selected fourier modes for longitudinal efield
        s1.elt = numpy.empty((s1.modesxel),complex_type,'F')
@@ -376,6 +381,7 @@ def init(s1):
     # initialize trajectory diagnostic
     if (s1.ntt > 0):
     # s1.iprobt = scratch array 
+       pc.addGraph("TRAJ", "Trajectory") #Enable ion velocities
        s1.iprobt = numpy.empty((s1.nprobt),numpy.int32)
        mdiag1.setptraj1(s1.ppart,s1.kpic,s1.iprobt,s1.nst,s1.vtx,s1.vtsx,s1.dvtx,
                         s1.np,s1.nprobt)
@@ -419,6 +425,12 @@ def step(s1):
     # add guard cells: updates s1.qe
    mgard1.maguard1(s1.qe,s1.tguard,s1.nx)
 
+   #density overlay
+   denName = ["DENOVERLAY"]
+   denX = []
+   denY = []
+   denTxt = "Ion-Electron overlay"
+
     # electron density diagnostic
    if (s1.ntde > 0):
       s1.it = int(s1.ntime/s1.ntde)
@@ -437,6 +449,9 @@ def step(s1):
          mfft1.mfft1cr(s1.sfieldc,s1.sfield,s1.mixup,s1.sct,s1.tfft,s1.indx)
          mgard1.mdguard1(s1.sfield,s1.tguard,s1.nx)
          # display smoothed electron density
+         denName.append("EDENSITY"); denX.append(numpy.array(range(s1.nx)));
+         denY.append(numpy.array(s1.sfield[0:s1.nx], copy=True ));
+         pc.showSimple("EDENSITY", numpy.array(range(s1.nx)), s1.sfield[0:s1.nx], "")
          graf1.dscaler1(s1.sfield,' EDENSITY',s1.ntime,999,0,s1.nx,s1.irc)
          if (s1.irc[0]==1):
             return
@@ -472,6 +487,9 @@ def step(s1):
                mfft1.mfft1cr(s1.sfieldc,s1.sfield,s1.mixup,s1.sct,s1.tfft,s1.indx)
                mgard1.mdguard1(s1.sfield,s1.tguard,s1.nx)
                # display smoothed ion density
+               denName.append("IDENSITY"); denX.append(numpy.array(range(s1.nx)));
+               denY.append(numpy.array(s1.sfield[0:s1.nx], copy=True));
+               pc.showSimple("IDENSITY", numpy.array(range(s1.nx)), s1.sfield[0:s1.nx], "")
                graf1.dscaler1(s1.sfield,' IDENSITY',s1.ntime,999,1,s1.nx,s1.irc)
                if (s1.irc[0]==1):
                   return
@@ -495,6 +513,9 @@ def step(s1):
                   if (s1.irc[0]==1):
                      return
                   s1.irc[0] = 0
+
+   if len(denY) > 0:
+      pc.showSimple(denName, denX, denY, denTxt)
 
     # add electron and ion densities: updates s1.qe
    mfield1.maddqei1(s1.qe,s1.qi,s1.tfield,s1.nx)
@@ -573,6 +594,7 @@ def step(s1):
             mfft1.mfft1cr(s1.sfieldc,s1.sfield,s1.mixup,s1.sct,s1.tfft,s1.indx)
             mgard1.mdguard1(s1.sfield,s1.tguard,s1.nx)
             # display longitudinal efield
+            pc.showSimple("ELON", numpy.array(range(s1.nx)), s1.sfield[0:s1.nx], "")
             graf1.dscaler1(s1.sfield,' ELFIELD',s1.ntime,999,0,s1.nx,s1.irc)
             if (s1.irc[0]==1):
                return
@@ -620,6 +642,7 @@ def step(s1):
             # calculate particle distribution function and moments
             mdiag1.mvdist1(s1.partt,s1.fvtp,s1.fvmtp,s1.tdiag,s1.nprobt,s1.nmv)
             # display velocity distributions
+            pc.showVelocity(s1.fvtp[:,:], fvm=s1.fvmtp, plottype="TRAJ")
             graf1.displayfv1(s1.fvtp,s1.fvmtp,' ELECTRON',s1.ntime,s1.nmv,1,s1.irc)
             if (s1.irc[0]==1):
                return
