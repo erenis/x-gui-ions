@@ -484,7 +484,7 @@ class PhiControlPanel(BaseControlPanel):
 		#Maximum Omega Slider
 		self.omegaMinVal = wx.StaticText(self.panel, label="", pos=(20, 90)) 
 		txt = wx.StaticText(self.panel, label='Maximum Omega', pos=(20, 90))  
-		sld = wx.Slider(self.panel, value=self.POmegaMax, minValue=2, maxValue=50, pos=(20, 20), size=(250, -1), style=wx.SL_HORIZONTAL)
+		sld = wx.Slider(self.panel, value=self.POmegaMax, minValue=0.5, maxValue=50, pos=(20, 20), size=(250, -1), style=wx.SL_HORIZONTAL)
 		hs1.Add(txt)
 		hs1.Add(sld)
 		hs1.Add(self.omegaMinVal)
