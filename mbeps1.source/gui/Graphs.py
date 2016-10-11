@@ -217,7 +217,7 @@ class DrawSimple(DrawOptions, KeyList):
 		DrawOptions.__init__(self)
 		self.setupKeylist(DrawOptions.defaultKeylist)
 		if type(name) != type([]):
-			self.nl = [name]
+			self.nl = [name,""]
 		else:
 			self.nl = name
 			if len(self.nl) != len(xdata) + 1:
