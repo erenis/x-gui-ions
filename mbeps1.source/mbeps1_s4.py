@@ -792,7 +792,7 @@ pc.asyncMode(0)     #Run in synchornos mode.
 pc.callbacks["VARCHANGE"] = changeVarsCallback  #Set a callback
 pc.callbacks["RESET"] = resetCallback  #define the callback
 #pc.clearGraphList()
-pc.addGraph("EVELOCITY", "Electron Velocity")
+pc.addGraph("VELOCITY", "Electron Velocity")
 
 #Now init Fortran simulation
 init(in1)

@@ -96,8 +96,8 @@ PYCCOPTS = $(CCOPTS) -fPIC
 #export CFLAGS = -O3 -fopenmp
 #export CFLAGS = -O3 -fopenmp -Wall
 
-LOPTS = -lgomp
-#LOPTS = -lgomp -lYgl -L/usr/X11R6/lib -lX11
+#LOPTS = -lgomp
+LOPTS = -lgomp -lYgl -L/usr/X11R6/lib -lX11
 LEGACY =
 
 # Makefile PGI compiler with Linux
@@ -180,12 +180,14 @@ EDMODS = modmdpush1.o
 
 # Fortran Graphics
 
+#Tektronix
 #GOBJS = libt1.o plot10.o libplt10.o dlibgks1.o libgks1.o libgraf1_h.o \
 #modgraf1.o
 # X11 graphics needs Ygl from http://www.thp.uni-duisburg.de/Ygl/
-#GOBJS = libygl.o dlibgks1.o libgks1.o libgraf1_h.o modgraf1.o
+GOBJS = libygl.o dlibgks1.o libgks1.o libgraf1_h.o modgraf1.o
 #No graphics
-GOBJS = nullgks1.o libgraf1_h.o modgraf1.o
+#GOBJS = nullgks1.o libgraf1_h.o modgraf1.o
+
 #GOBJS = libt1.o plot10.o libplt10.o dlibgks1.o libgks1.o libgraf1_h.o \
 #modgraf1.o libgks2.o libgraf2_h.o modgraf2.o
 #No graphics
@@ -210,15 +212,15 @@ EDPYOBJS = pymdpush1.o
 
 # Python graphics
 
+#Tektronix
 #GMODSRC = modgraf1.f90 libt1.f90
-# X11 graphics
-GMODSRC = modgraf1.f90
-
 #GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibplt10.o pymplot10.o
 # X11 graphics needs Ygl from http://www.thp.uni-duisburg.de/Ygl/
-#GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibygl.o
+GMODSRC = modgraf1.f90
+GPYOBJS = pymlibgks1.o pymdlibgks1.o pymlibygl.o
 #No graphics
-GPYOBJS = pymnullgks1.o
+#GMODSRC = modgraf1.f90
+#GPYOBJS = pymnullgks1.o
 
 # Linkage rules
 
@@ -230,15 +232,15 @@ mbeps1 : mbeps1.o $(ESOBJS) $(GOBJS) dtimer.o
 	$(MPFC) $(OPTS90) $(LOPTS) -o mbeps1 \
     mbeps1.o $(ESOBJS) $(ESMODS) omplib.o $(ESHOBJS) $(GOBJS) dtimer.o
 
-mbbeps1 : mbbeps1.o $(ESOBJS) $(EMOBJS) dtimer.o
+mbbeps1 : mbbeps1.o $(ESOBJS) $(EMOBJS) $(GOBJS) dtimer.o
 	$(MPFC) $(OPTS90) $(LOPTS) -o mbbeps1 \
     mbbeps1.o $(ESOBJS) $(EMOBJS) $(ESMODS) $(EMMODS) omplib.o \
-    $(ESHOBJS) $(EMHOBJS) dtimer.o
+    $(ESHOBJS) $(EMHOBJS) $(GOBJS) dtimer.o
 
-mdbeps1 : mdbeps1.o $(ESOBJS) $(EMOBJS) $(EDOBJS) dtimer.o
+mdbeps1 : mdbeps1.o $(ESOBJS) $(EMOBJS) $(EDOBJS) $(GOBJS) dtimer.o
 	$(MPFC) $(OPTS90) $(LOPTS) -o mdbeps1 \
     mdbeps1.o $(ESOBJS) $(EMOBJS) $(EDOBJS) $(ESMODS) $(EMMODS) $(EDMODS) \
-    omplib.o $(ESHOBJS) $(EMHOBJS) $(EDHOBJS) dtimer.o
+    omplib.o $(ESHOBJS) $(EMHOBJS) $(EDHOBJS)  $(GOBJS) dtimer.o
 
 # Python
 
@@ -353,10 +355,10 @@ modmdiag1.o : modmdiag1.f90 libmdiag1_h.o
 mbeps1.o : mbeps1.f90 $(ESMODS) modgraf1.o omplib.o
 	$(MPFC) $(OPTS90) -o mbeps1.o -c mbeps1.f90
 
-mbbeps1.o : mbbeps1.f90 $(ESMODS) $(EMMODS) omplib.o
+mbbeps1.o : mbbeps1.f90 $(ESMODS) $(EMMODS) modgraf1.o omplib.o
 	$(MPFC) $(OPTS90) -o mbbeps1.o -c mbbeps1.f90
 
-mdbeps1.o : mdbeps1.f90 $(ESMODS) $(EMMODS) $(EDMODS) omplib.o
+mdbeps1.o : mdbeps1.f90 $(ESMODS) $(EMMODS) $(EDMODS) modgraf1.o omplib.o
 	$(MPFC) $(OPTS90) -o mdbeps1.o -c mdbeps1.f90
 
 # Fortran Graphics

@@ -144,7 +144,7 @@ class MainFrame(wx.Frame, Dispatcher, DefaultsCommLink):
 
 	def OnClearGraphStack(self,event):
 		if hasattr(event,"codename"):
-			print "Codename"
+			self.dispatchers.append(GraphStack(3,event.codename, event.desc))
 		else:
 			print "Clearing GS"
 			del self.dispatchers[:]  #Delete all objects in dispatchers, defined in GraphStack.py
