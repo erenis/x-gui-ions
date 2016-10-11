@@ -1,0 +1,72 @@
+import threading
+from lib import *
+import numpy as NP
+import cPickle
+
+from Graphs import *
+from Events import *
+
+from multiprocessing import Queue
+
+class PipeSimulation(threading.Thread):
+	def __init__(self,notify_window, pipe, que, timedir, async):
+		"""Init Worker Thread Class."""
+		threading.Thread.__init__(self)
+		self._notify_window = notify_window
+		self._want_abort = 0
+		self.pipe = pipe
+		self.que = que
+		self.async = async
+		self.timeDir = timedir
+		self._pollrate = 1.0/30.0  #times per second to poll for input.  Set to 0 for no delay
+		self.initFortran()
+		self.start()
+
+	def initFortran(self):
+		self.iAmRunning = False
+		self.fC = 0
+		self.curTime = 0
+
+	def run(self):
+		while self.step() == 0:
+			True
+
+	def step(self):
+		#Python Changes
+		self.fC += 1
+		postCount = 1
+		#if self.pipe.poll(self._pollrate):  #If there is data for us
+		#temp_obj = self.pipe.recv()
+		#wx.PostEvent(self._notify_window, ResultEvent(temp_obj, self.curTime))
+
+		try:
+			temp_obj = cPickle.loads(self.que.get_nowait())
+		except:
+			return 1
+		try:
+			self.curTime = temp_obj._tackOnTime
+		except:
+			True
+		if self.async.value == 0:
+			self.pipe.send("Go")
+		try:  #Check to see if object is a graph of a signal
+			if temp_obj.signame == "OPENFRAME":
+				print "Got OpenFRame"
+				wx.PostEvent(self._notify_window, ControlEvent(temp_obj, self.curTime))
+				return postCount
+			if temp_obj.signame == "SETTIME":
+				wx.PostEvent(self._notify_window, SimTimeEvent(temp_obj.time))
+				return postCount
+			if temp_obj.signame == "CLEARGRAPHSTACK":
+				_tcs = ClearGraphStackEvent()
+				if hasattr(temp_obj,"codename"):  #pass on info related to adding new graphstack listeners
+					_tcs.codename = temp_obj.codename
+					_tcs.desc = temp_obj.desc
+				wx.PostEvent(self._notify_window, _tcs)
+				return postCount
+			else:
+				raise AttributeError
+		except:
+			wx.PostEvent(self._notify_window, ResultEvent(temp_obj, self.curTime))
+			
+		return postCount

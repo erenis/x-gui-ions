@@ -1,0 +1,36 @@
+Welcome to a brief tutorial on going from procedural code to an interactive GUI
+interface. The first thing we need to do is re-work the code in to a form that 
+can be used interactively.  The most important step is to move any simulation 
+variables out ofthe global space.
+
+There are two main reasons to not use global variables.  First the GUI can 
+dynamically interact with simulation parameters.  It expects and object
+containting all relevant state variables (in C terms, it needs a pointer to a 
+data structure with all relevant parameters), it is much simpler than storing
+everything in one messy state.  It is also easier to extend the behavvior, and
+do fancier tricks, such as resetting the state without quitting the
+application, or even previewing the first frame of a simulation before
+running it.
+
+
+The general strategy is create two functions init(in1) and step(in1).  init
+initializes all data structures, and stores them in object in1.  For example,
+if the simulation had an array called part, it would be stored in in1.part.  
+Remember, python is a dynamic language, so you can create attributes in objects
+at will.  It is tempting to want to use global variables, because writing var1
+is slightly more compact than in1.var1, or o.var1 (you can name your container
+anything), however the cosmetic appeal of saving 2 characters is simply not
+worth the very real nightmare of trying to do everything in global space.
+
+The function step(in1) runs a single time step of the simulation, using in1 as
+its current state.  A simple pseudo-code example could be:
+
+data = StorageObject()
+init(data)
+
+for i in range(MAX_STEPS):
+	step(data)
+
+I do this conversion for the orignal mbeps1.py, in a file called mbeps1_s1.py
+
+

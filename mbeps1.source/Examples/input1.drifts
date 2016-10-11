@@ -1,0 +1,44 @@
+ &input1
+!
+! idrun = run identifier for current run
+ IDRUN = 12
+!
+! indx = exponent which determines length in x direction, nx=2**indx
+! npx = number of background particles distributed in x direction
+! npxb = number of beam particles in x direction
+ INDX =   9, NPX =   18432, NPXB = 0
+!
+! inorder = interpolation order
+ INORDER = 1
+!
+! ntw = number of time steps between energy diagnostic
+! ntp = number of time steps between potential diagnostic
+! ntv = number of time steps between velocity-space diagnostic
+! nts = number of time steps between phase space diagnostic
+ NTW = 1, NTP = 5, NTV = 5, NTS = 5
+!
+! tend = time at end of simulation, in units of plasma frequency
+! dt = time interval between successive calculations
+ TEND = 100.000, DT =   0.100
+!
+! qme = charge on electron, in units of e
+! vtx = thermal velocity of electrons in x direction
+! vx0 = drift velocity of electrons in x direction
+ QME =  -1.000,  VTX =   0.001, VX0 =   0.0
+!
+! vtdx/vtdy/vtdz = thermal velocity of beam electrons in x direction
+! vdx/vdy/vdz = drift velocity of beam electrons in x direction
+ VTDX = 0.0, VDX = 0.0
+!
+! ax = half-width of particle in x direction
+!AX = .912871
+ AX = 0.0
+!
+! modesxp = number of modes in x to keep for potential diagnostic
+ MODESXP = 256
+!
+! nplot = maximum number of plots per page
+! sortime = number of time steps between electron sorting
+ NPLOT = 3, SORTIME = 0
+!
+ /

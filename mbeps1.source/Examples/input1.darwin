@@ -1,0 +1,13 @@
+ &input1
+ IDRUN = 30
+ INDX =   9, NPX =   18432, NPXB = 0
+ NTW = 1, NTP = 5, NTV = 5, NTA = 5
+ NDC = 2
+ OMX = 0.0, OMY = 0.0, OMZ = 0.4
+ TEND = 1000.000, DT =   0.200, CI = 0.1
+ QME =  -1.000,  VTX =   1.000, VTY =   1.000, VTZ = 1.000
+ VX0 =   0.000, VY0 =   0.000, VZ0 =   0.000
+ AX = .912871
+ MODESXP = 40, MODESXA = 40
+ NPLOT = 0, SORTIME = 0
+ /
